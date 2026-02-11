@@ -5,9 +5,7 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,55 +16,18 @@ export default function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const router = useRouter();
-  const { data: session, status } = useSession();
-
-  // Redirect authenticated users to /images
-  useEffect(() => {
-    if (status === "authenticated" && session) {
-      router.push("/images");
-    }
-  }, [status, session, router]);
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Validate inputs
     if (!email || !password) {
       setError("Vui lòng nhập đầy đủ email và mật khẩu");
       return;
     }
 
     setIsLoading(true);
-
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false, // Don't redirect automatically
-      });
-
-      if (result?.error) {
-        // Display error message from server
-        setError(result.error);
-        setIsLoading(false);
-        return;
-      }
-
-      if (result?.ok) {
-        // Successful login - redirect to home page
-        router.push("/");
-        router.refresh(); // Refresh to update session
-      } else {
-        setError("Đăng nhập thất bại. Vui lòng thử lại.");
-        setIsLoading(false);
-      }
-    } catch (err: any) {
-      console.error("Login error:", err);
-      setError("Đã xảy ra lỗi. Vui lòng thử lại.");
-      setIsLoading(false);
-    }
+    // TODO: implement sign-in logic
+    setIsLoading(false);
   };
 
   return (

@@ -28,25 +28,8 @@ const ResetPasswordButton = ({ userId }: ResetPasswordButtonProps) => {
     if (!confirmed) return;
 
     setIsLoading(true);
-    try {
-      const response = await fetch(`/api/users/${userId}/reset-password`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể reset mật khẩu");
-      }
-
-      const data = await response.json();
-      setPasswordData(data.data);
-      setShowModal(true);
-    } catch (error: any) {
-      console.error("Error resetting password:", error);
-      alert(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    // TODO: implement reset password logic
+    setIsLoading(false);
   };
 
   const handleCopyPassword = async () => {

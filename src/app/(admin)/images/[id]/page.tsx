@@ -50,46 +50,12 @@ const ImageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
     Array<{ id: string; name: string }>
   >([]);
 
-  // Fetch image details
-  const fetchImageDetails = async () => {
-    if (!imageId) return;
+  // TODO: implement fetch image details from API
+  const fetchImageDetails = async () => {};
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`/api/images/${imageId}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Không thể tải thông tin ảnh");
-      }
-
-      setImage(result);
-    } catch (err: any) {
-      console.error("Error loading image details:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch categories
+  // TODO: implement fetch categories from API
   const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories");
-      const result = await response.json();
-
-      if (response.ok) {
-        const categoriesList = result.data.map((cat: any) => ({
-          id: cat.id,
-          name: cat.name,
-        }));
-        setCategories(categoriesList);
-      }
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
+    setCategories([]);
   };
 
   // Handle edit mode
@@ -105,70 +71,21 @@ const ImageDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   // Handle update submit
   const handleUpdateSubmit = async () => {
     if (!image || !editName.trim()) return;
-
     setIsUpdating(true);
-    try {
-      const response = await fetch(`/api/images/${imageId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: editName.trim(),
-          productUrl: editProductUrl.trim() || null,
-          categoryId: editCategoryId,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Không thể cập nhật ảnh");
-      }
-
-      // Update local state with new data
-      setImage(result.image);
-      setIsEditMode(false);
-      alert("Cập nhật ảnh thành công!");
-    } catch (err: any) {
-      console.error("Error updating image:", err);
-      alert(err.message);
-    } finally {
-      setIsUpdating(false);
-    }
+    // TODO: implement update image logic
+    setIsEditMode(false);
+    setIsUpdating(false);
   };
 
   // Handle delete
   const handleDelete = async () => {
     if (!image) return;
-
-    // Confirmation dialog
-    const confirmed = window.confirm(
-      `Bạn có chắc chắn muốn xóa ảnh "${image.name}"?\n\nHành động này không thể hoàn tác.`,
-    );
-
+    const confirmed = window.confirm(`Bạn có chắc chắn muốn xóa ảnh "${image.name}"?\n\nHành động này không thể hoàn tác.`);
     if (!confirmed) return;
-
     setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/images/${imageId}`, {
-        method: "DELETE",
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Không thể xóa ảnh");
-      }
-
-      alert("Xóa ảnh thành công!");
-      router.push("/images");
-    } catch (err: any) {
-      console.error("Error deleting image:", err);
-      alert(err.message);
-    } finally {
-      setIsDeleting(false);
-    }
+    // TODO: implement delete image logic
+    router.push("/images");
+    setIsDeleting(false);
   };
 
   useEffect(() => {

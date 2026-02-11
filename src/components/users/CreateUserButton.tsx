@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { Plus, Eye, EyeOff } from "lucide-react";
 
@@ -11,7 +10,6 @@ interface CreateUserButtonProps {
 
 const CreateUserButton = ({ onSuccess }: CreateUserButtonProps) => {
   const { theme } = useTheme();
-  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [showUnauthorized, setShowUnauthorized] = useState(false);
   const [name, setName] = useState("");
@@ -23,33 +21,7 @@ const CreateUserButton = ({ onSuccess }: CreateUserButtonProps) => {
   const [isActive, setIsActive] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [roles, setRoles] = useState<Array<{ id: number; name: string }>>([]);
-
-  // Fetch roles on mount
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await fetch("/api/roles");
-        const result = await response.json();
-        if (response.ok) {
-          // Exclude "Admin" role to prevent accidental creation of admin accounts
-          const filteredRoles = result.data.filter(
-            (role: { id: number; name: string }) => role.name !== "Admin"
-          );
-          setRoles(filteredRoles);
-          if (filteredRoles.length > 0) {
-            setRoleId(filteredRoles[0].id.toString());
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching roles:", err);
-      }
-    };
-
-    if (isOpen) {
-      fetchRoles();
-    }
-  }, [isOpen]);
+  const roles: Array<{ id: number; name: string }> = [];
 
   const handleCreate = async () => {
     if (!name.trim()) {
@@ -67,53 +39,22 @@ const CreateUserButton = ({ onSuccess }: CreateUserButtonProps) => {
 
     setIsSubmitting(true);
     setError(null);
-
-    try {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          password: password.trim(),
-          gender,
-          roleId: parseInt(roleId),
-          isActive,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setName("");
-        setEmail("");
-        setPassword("");
-        setShowPassword(false);
-        setGender(false);
-        setIsActive(true);
-        setIsOpen(false);
-        onSuccess();
-      } else {
-        setError(data.error || "Đã xảy ra lỗi khi tạo tài khoản");
-      }
-    } catch (error) {
-      console.error("Error creating user:", error);
-      setError("Đã xảy ra lỗi. Vui lòng thử lại.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // TODO: implement create user logic
+    setName("");
+    setEmail("");
+    setPassword("");
+    setShowPassword(false);
+    setGender(false);
+    setIsActive(true);
+    setIsOpen(false);
+    onSuccess();
+    setIsSubmitting(false);
   };
 
   return (
     <>
       <button
-        onClick={() => {
-          if (session?.user?.role !== "Admin") {
-            setShowUnauthorized(true);
-          } else {
-            setIsOpen(true);
-          }
-        }}
+        onClick={() => setIsOpen(true)}
         className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium ${
           theme === "dark"
             ? "bg-blue-600 hover:bg-blue-700"

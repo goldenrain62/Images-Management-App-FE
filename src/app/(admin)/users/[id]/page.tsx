@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import UserAddressCard from "@/components/user-profile/UserAddressCard";
 import UserInfoCard from "@/components/user-profile/UserInfoCard";
@@ -35,57 +34,18 @@ interface User {
 
 const DetailedUserPage = () => {
   const params = useParams();
-  const { data: session } = useSession();
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const userId = params.id as string;
 
-  // Fetch user data
-  const fetchUser = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/users/${userId}`);
+  // TODO: implement fetch user from API
+  const fetchUser = async () => {};
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể tải thông tin người dùng");
-      }
-
-      const data = await response.json();
-      setUser(data.data);
-      setError(null);
-    } catch (err: any) {
-      console.error("Error fetching user:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, [userId]);
-
-  // Permission logic
-  const currentUserRole = session?.user?.role;
-  const currentUserId = session?.user?.id;
-  const isAdmin = currentUserRole === "Admin";
-  const isViewingOwnProfile = currentUserId === userId;
-  const isViewingAdminProfile = user?.role === "Admin";
-
-  // Determine if DeleteUserButton should be shown
-  // Show if: current user is Admin AND viewing another user's profile AND that user is not Admin
-  const showDeleteButton = isAdmin && !isViewingOwnProfile && !isViewingAdminProfile;
-
-  // Determine if toggle should be changeable
-  // Changeable if: Admin viewing another non-admin user
-  const canChangeStatus = isAdmin && !isViewingOwnProfile && !isViewingAdminProfile;
-
-  // Determine if user can edit this profile
-  // Can edit if: Admin (can edit any account) OR viewing own profile
-  const canEdit = isAdmin || isViewingOwnProfile;
+  const showDeleteButton = true;
+  const canChangeStatus = true;
+  const canEdit = true;
 
   if (isLoading) {
     return <LoadingSpinner />;

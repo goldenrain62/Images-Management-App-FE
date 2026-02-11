@@ -31,39 +31,9 @@ const DetailedCategoryPage = ({
   const [images, setimages] = useState<ImageProps[]>([]);
   const [vieweropen, setvieweropen] = useState(false);
   const [viewerindex, setviewerindex] = useState(0);
+  // TODO: implement fetch images from API
   const LoadImages = async () => {
-    if (!categoryid) return;
-
-    setisloading(true);
-    seterror(null);
-
-    try {
-      const response = await fetch(`/api/categories/${categoryid}/images`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "không thể tải danh sách ảnh");
-      }
-
-      setcategoryname(result.categoryName);
-
-      const transformeddata: ImageProps[] = result.images.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        size: imageSizeFormatter(item.size),
-        imageUrl: item.imageUrl,
-        thumbnailUrl: item.thumbnailUrl,
-        uploadDate: new Date(item.createdAt).toLocaleDateString("vi-VN"),
-        uploader: item.uploader.name,
-      }));
-
-      setimages(transformeddata);
-    } catch (err: any) {
-      console.error("error loading images:", err);
-      seterror(err.message);
-    } finally {
-      setisloading(false);
-    }
+    setimages([]);
   };
 
   // open image viewer
@@ -93,33 +63,10 @@ const DetailedCategoryPage = ({
 
   // delete image
   const handledelete = async (imageid: string, imagename: string) => {
-    // confirmation dialog
-    const confirmed = window.confirm(
-      `bạn có chắc chắn muốn xóa ảnh "${imagename}"?\n\nhành động này không thể hoàn tác.`,
-    );
-
+    const confirmed = window.confirm(`bạn có chắc chắn muốn xóa ảnh "${imagename}"?\n\nhành động này không thể hoàn tác.`);
     if (!confirmed) return;
-
-    try {
-      const response = await fetch(
-        `/api/categories/${categoryid}/images/${imageid}`,
-        {
-          method: "delete",
-        },
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // reload images after successful deletion
-        LoadImages();
-      } else {
-        alert(data.error || "không thể xóa ảnh. vui lòng thử lại.");
-      }
-    } catch (error) {
-      console.error("delete failed:", error);
-      alert("đã xảy ra lỗi khi xóa ảnh. vui lòng thử lại.");
-    }
+    // TODO: implement delete image logic
+    setimages((prev) => prev.filter((img) => img.id !== imageid));
   };
 
   // useeffect hooks

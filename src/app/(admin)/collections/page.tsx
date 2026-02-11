@@ -36,37 +36,9 @@ const CategoriesPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Move the fetch logic into a stable, reusable function
+  // TODO: implement fetch categories from API
   const fetchCategories = useCallback(async (isSilent = false) => {
-    if (!isSilent) setIsLoading(true); // Show loading state while refreshing
-    try {
-      const response = await fetch("/api/categories");
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể tải danh sách loại sàn");
-      }
-
-      const data = await response.json();
-
-      // Transform the data to match CategoryProps
-      const transformedData: CategoryProps[] = data.data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        createDate: new Date(item.createdAt).toLocaleDateString("vi-VN"), // Format the date
-        creator: item.creator.name, // Flatten the object to a string
-        imagesQty: item.imagesQty || 0,
-        totalSize: item.totalSize || 0,
-      }));
-
-      setCategories(transformedData);
-      setError(null);
-    } catch (err: any) {
-      console.error("Error fetching categories:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+    setCategories([]);
   }, []);
 
   // When the page first loads
@@ -109,39 +81,15 @@ const CategoriesPage = () => {
   // Handle edit submit
   const handleEditSubmit = async () => {
     if (!editingCategory || !editName.trim()) return;
-
     setIsUpdating(true);
-    try {
-      const response = await fetch(`/api/categories/${editingCategory.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: editName.trim() }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể cập nhật loại sàn");
-      }
-
-      // Update local state
-      setCategories((prev) =>
-        prev.map((cat) =>
-          cat.id === editingCategory.id ? { ...cat, name: editName.trim() } : cat
-        )
-      );
-
-      // Close modal
-      setIsEditModalOpen(false);
-      setEditingCategory(null);
-      setEditName("");
-    } catch (err: any) {
-      console.error("Error updating category:", err);
-      alert(err.message);
-    } finally {
-      setIsUpdating(false);
-    }
+    // TODO: implement update category logic
+    setCategories((prev) =>
+      prev.map((cat) => cat.id === editingCategory.id ? { ...cat, name: editName.trim() } : cat)
+    );
+    setIsEditModalOpen(false);
+    setEditingCategory(null);
+    setEditName("");
+    setIsUpdating(false);
   };
 
   // Handle delete button click
@@ -153,30 +101,12 @@ const CategoriesPage = () => {
   // Handle delete confirm
   const handleDeleteConfirm = async () => {
     if (!deletingCategory) return;
-
     setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/categories/${deletingCategory.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể xóa loại sàn");
-      }
-
-      // Remove from local state
-      setCategories((prev) => prev.filter((cat) => cat.id !== deletingCategory.id));
-
-      // Close modal
-      setIsDeleteModalOpen(false);
-      setDeletingCategory(null);
-    } catch (err: any) {
-      console.error("Error deleting category:", err);
-      alert(err.message);
-    } finally {
-      setIsDeleting(false);
-    }
+    // TODO: implement delete category logic
+    setCategories((prev) => prev.filter((cat) => cat.id !== deletingCategory.id));
+    setIsDeleteModalOpen(false);
+    setDeletingCategory(null);
+    setIsDeleting(false);
   };
 
   return (

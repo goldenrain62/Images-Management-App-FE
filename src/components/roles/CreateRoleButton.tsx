@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useState,
-  KeyboardEvent as ReactKeyboardEvent,
-  useEffect,
-} from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { Plus } from "lucide-react";
 
@@ -29,33 +24,12 @@ const CreateRoleButton = ({ onSuccess }: CreateRoleProps) => {
 
     setIsSubmitting(true);
     setError(null);
-
-    try {
-      const res = await fetch("/api/roles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || undefined,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setName("");
-        setDescription("");
-        setIsOpen(false);
-        onSuccess();
-      } else {
-        setError(data.error || "Đã xảy ra lỗi khi tạo loại tài khoản");
-      }
-    } catch (error) {
-      console.error("Error creating role:", error);
-      setError("Đã xảy ra lỗi. Vui lòng thử lại.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // TODO: implement create role logic
+    setName("");
+    setDescription("");
+    setIsOpen(false);
+    onSuccess();
+    setIsSubmitting(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

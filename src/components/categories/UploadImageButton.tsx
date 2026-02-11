@@ -60,40 +60,13 @@ const UploadImageButton = ({
 
     setUploading(true);
     setError(null);
-
-    const formData = new FormData();
-
-    // Append all files
-    selectedFiles.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    try {
-      setProgress(`Đang tải lên ${selectedFiles.length} ảnh...`);
-
-      const res = await fetch(`/api/categories/${categoryId}/images`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setProgress("");
-        setSelectedFiles([]);
-        onUploadSuccess(); // Refresh the parent's list
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      } else {
-        setError(data.error || "Tải lên thất bại");
-        setProgress("");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      setError("Đã xảy ra lỗi khi tải ảnh lên");
-      setProgress("");
-    } finally {
-      setUploading(false);
-    }
+    setProgress(`Đang tải lên ${selectedFiles.length} ảnh...`);
+    // TODO: implement upload logic
+    setProgress("");
+    setSelectedFiles([]);
+    onUploadSuccess();
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setUploading(false);
   };
 
   // Remove a file from selection

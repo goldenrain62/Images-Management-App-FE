@@ -20,27 +20,10 @@ const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
   const handleDelete = async () => {
     setIsDeleting(true);
     setError(null);
-
-    try {
-      const res = await fetch(`/api/users/${userId}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setIsOpen(false);
-        router.push("/users");
-        router.refresh();
-      } else {
-        setError(data.error || "Đã xảy ra lỗi khi xóa tài khoản");
-      }
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      setError("Đã xảy ra lỗi. Vui lòng thử lại.");
-    } finally {
-      setIsDeleting(false);
-    }
+    // TODO: implement delete user logic
+    setIsOpen(false);
+    router.push("/users");
+    setIsDeleting(false);
   };
 
   return (

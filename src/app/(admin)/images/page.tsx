@@ -20,40 +20,9 @@ const ImagePage = () => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
 
-  // Fetch images from API
+  // TODO: implement fetch images from API
   const fetchImages = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/images");
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể tải danh sách hình ảnh");
-      }
-
-      const data = await response.json();
-
-      // Transform the data to match ImageProps
-      const transformedData: ImageProps[] = data.data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        size: imageSizeFormatter(item.size),
-        uploadDate: new Date(item.uploadedAt).toLocaleDateString("vi-VN"),
-        uploader: item.uploader.name,
-        imageUrl: item.imageUrl,
-        thumbnailUrl: item.thumbnailUrl,
-        categoryId: item.category.id,
-        categoryName: item.category.name,
-      }));
-
-      setImages(transformedData);
-      setError(null);
-    } catch (err: any) {
-      console.error("Error fetching images:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+    setImages([]);
   }, []);
 
   // Load images on mount
@@ -87,38 +56,11 @@ const ImagePage = () => {
   };
 
   // Delete image
-  const handleDelete = async (
-    imageId: string,
-    categoryId: string,
-    imageName: string,
-  ) => {
-    // Confirmation dialog
-    const confirmed = window.confirm(
-      `Bạn có chắc chắn muốn xóa ảnh "${imageName}"?\n\nHành động này không thể hoàn tác.`,
-    );
-
+  const handleDelete = async (imageId: string, categoryId: string, imageName: string) => {
+    const confirmed = window.confirm(`Bạn có chắc chắn muốn xóa ảnh "${imageName}"?\n\nHành động này không thể hoàn tác.`);
     if (!confirmed) return;
-
-    try {
-      const response = await fetch(
-        `/api/categories/${categoryId}/images/${imageId}`,
-        {
-          method: "DELETE",
-        },
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Reload images after successful deletion
-        fetchImages();
-      } else {
-        alert(data.error || "Không thể xóa ảnh. Vui lòng thử lại.");
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      alert("Đã xảy ra lỗi khi xóa ảnh. Vui lòng thử lại.");
-    }
+    // TODO: implement delete image logic
+    setImages((prev) => prev.filter((img) => img.id !== imageId));
   };
 
   return (

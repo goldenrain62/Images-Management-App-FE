@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface CategoryResult {
@@ -27,35 +27,8 @@ const SearchDropdown = ({
   onClose: () => void;
 }) => {
   const router = useRouter();
-  const [results, setResults] = useState<SearchResults>({
-    categories: [],
-    images: [],
-  });
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults({ categories: [], images: [] });
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch(
-          `/api/search?q=${encodeURIComponent(query.trim())}`,
-        );
-        const data = await res.json();
-        setResults(data);
-      } catch {
-        setResults({ categories: [], images: [] });
-      } finally {
-        setIsLoading(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [query]);
+  const results: SearchResults = { categories: [], images: [] };
+  const isLoading = false;
 
   const handleSelect = (path: string) => {
     router.push(path);

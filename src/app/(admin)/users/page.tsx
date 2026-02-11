@@ -28,26 +28,9 @@ const UsersPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch users
+  // TODO: implement fetch users from API
   const fetchUsers = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/users");
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể tải danh sách tài khoản");
-      }
-
-      const data = await response.json();
-      setUsers(data.data);
-      setError(null);
-    } catch (err: any) {
-      console.error("Error fetching users:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+    setUsers([]);
   }, []);
 
   // Load users on mount

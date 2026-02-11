@@ -5,7 +5,6 @@ import Button from "@/components/ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function ResetPasswordForm() {
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -20,8 +19,6 @@ export default function ResetPasswordForm() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const router = useRouter();
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,45 +57,8 @@ export default function ResetPasswordForm() {
     }
 
     setIsLoading(true);
-
-    try {
-      // TODO: Replace with actual API endpoint
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          oldPassword,
-          newPassword,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Đặt lại mật khẩu thất bại");
-      }
-
-      setSuccess("Đặt lại mật khẩu thành công! Đang chuyển hướng...");
-
-      // Clear form
-      setEmail("");
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-
-      // Redirect to sign in after 2 seconds
-      setTimeout(() => {
-        router.push("/signin");
-      }, 2000);
-    } catch (err: any) {
-      console.error("Reset password error:", err);
-      setError(err.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
-    } finally {
-      setIsLoading(false);
-    }
+    // TODO: implement reset-password logic
+    setIsLoading(false);
   };
 
   return (

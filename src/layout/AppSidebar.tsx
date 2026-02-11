@@ -28,7 +28,7 @@ const navItems: NavItem[] = [
   {
     icon: <ChartBarStacked />,
     name: "Loại sàn gỗ",
-    path: "/categories",
+    path: "/collections",
   },
   {
     icon: <Users />,

@@ -3,8 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Shield, Eye } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
 import Blank from "@/components/common/Blank";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
@@ -20,13 +18,11 @@ interface RoleProps {
 
 const RolesPage = () => {
   const { theme } = useTheme();
-  const { data: session } = useSession();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [roles, setRoles] = useState<RoleProps[]>([]);
 
-  // Check if current user is Admin
-  const isAdmin = session?.user?.role === "Admin";
+  const isAdmin = true;
 
   // View/Edit state
   const [viewingRole, setViewingRole] = useState<RoleProps | null>(null);
@@ -46,28 +42,9 @@ const RolesPage = () => {
     });
   };
 
-  // Fetch roles from API
+  // TODO: implement fetch roles from API
   const fetchRoles = useCallback(async (isSilent = false) => {
-    if (!isSilent) setIsLoading(true);
-    try {
-      const response = await fetch("/api/roles");
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Không thể tải danh sách loại tài khoản",
-        );
-      }
-
-      const data = await response.json();
-      setRoles(data.data);
-      setError(null);
-    } catch (err: any) {
-      console.error("Error fetching roles:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+    setRoles([]);
   }, []);
 
   useEffect(() => {
@@ -107,86 +84,35 @@ const RolesPage = () => {
   // Handle update submit
   const handleUpdateSubmit = async () => {
     if (!viewingRole || !editName.trim()) return;
-
     setIsUpdating(true);
-    try {
-      const response = await fetch(`/api/roles/${viewingRole.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: editName.trim(),
-          description: editDescription.trim() || null,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể cập nhật loại tài khoản");
-      }
-
-      // Update local state
-      setRoles((prev) =>
-        prev.map((role) =>
-          role.id === viewingRole.id
-            ? {
-                ...role,
-                name: editName.trim(),
-                description: editDescription.trim() || null,
-                updatedAt: new Date().toISOString(),
-              }
-            : role
-        )
-      );
-
-      // Close modal
-      setIsViewModalOpen(false);
-      setViewingRole(null);
-      setEditName("");
-      setEditDescription("");
-    } catch (err: any) {
-      console.error("Error updating role:", err);
-      alert(err.message);
-    } finally {
-      setIsUpdating(false);
-    }
+    // TODO: implement update role logic
+    setRoles((prev) =>
+      prev.map((role) =>
+        role.id === viewingRole.id
+          ? { ...role, name: editName.trim(), description: editDescription.trim() || null, updatedAt: new Date().toISOString() }
+          : role
+      )
+    );
+    setIsViewModalOpen(false);
+    setViewingRole(null);
+    setEditName("");
+    setEditDescription("");
+    setIsUpdating(false);
   };
 
   // Handle delete
   const handleDeleteRole = async () => {
     if (!viewingRole) return;
-
-    const confirmDelete = confirm(
-      `Bạn có chắc chắn muốn xóa loại tài khoản "${viewingRole.name}"?`
-    );
+    const confirmDelete = confirm(`Bạn có chắc chắn muốn xóa loại tài khoản "${viewingRole.name}"?`);
     if (!confirmDelete) return;
-
     setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/roles/${viewingRole.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Không thể xóa loại tài khoản");
-      }
-
-      // Remove from local state
-      setRoles((prev) => prev.filter((role) => role.id !== viewingRole.id));
-
-      // Close modal
-      setIsViewModalOpen(false);
-      setViewingRole(null);
-      setEditName("");
-      setEditDescription("");
-    } catch (err: any) {
-      console.error("Error deleting role:", err);
-      alert(err.message);
-    } finally {
-      setIsDeleting(false);
-    }
+    // TODO: implement delete role logic
+    setRoles((prev) => prev.filter((role) => role.id !== viewingRole.id));
+    setIsViewModalOpen(false);
+    setViewingRole(null);
+    setEditName("");
+    setEditDescription("");
+    setIsDeleting(false);
   };
 
   return (
