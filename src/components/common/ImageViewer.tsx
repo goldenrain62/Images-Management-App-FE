@@ -1,0 +1,355 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  X,
+  ZoomIn,
+  ZoomOut,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  RotateCw,
+} from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+
+interface ImageViewerProps {
+  images: Array<{
+    id: string;
+    name: string;
+    imageUrl: string;
+    size: string;
+  }>;
+  currentIndex: number;
+  onClose: () => void;
+}
+
+const ImageViewer = ({ images, currentIndex, onClose }: ImageViewerProps) => {
+  const { theme } = useTheme();
+  const [index, setIndex] = useState(currentIndex);
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const currentImage = images[index];
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") handlePrevious();
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "+") handleZoomIn();
+      if (e.key === "-") handleZoomOut();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [index]);
+
+  // Mouse wheel zoom
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      setZoom((prevZoom) => {
+        const delta = e.deltaY < 0 ? 0.1 : -0.1;
+        const newZoom = Math.min(Math.max(prevZoom + delta, 0.5), 3);
+
+        // If zooming out to 1 or below, reset position
+        if (newZoom <= 1 && prevZoom > 1) {
+          setPosition({ x: 0, y: 0 });
+        }
+
+        return newZoom;
+      });
+    };
+
+    const viewer = document.getElementById("image-viewer-container");
+    if (viewer) {
+      viewer.addEventListener("wheel", handleWheel, { passive: false });
+      return () => viewer.removeEventListener("wheel", handleWheel);
+    }
+  }, []);
+
+  // Prevent body scroll when viewer is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
+  const handlePrevious = () => {
+    if (index > 0) {
+      setIndex(index - 1);
+      setZoom(1);
+      setRotation(0);
+      setPosition({ x: 0, y: 0 });
+    }
+  };
+
+  const handleNext = () => {
+    if (index < images.length - 1) {
+      setIndex(index + 1);
+      setZoom(1);
+      setRotation(0);
+      setPosition({ x: 0, y: 0 });
+    }
+  };
+
+  const handleZoomIn = () => {
+    setZoom((prev) => Math.min(prev + 0.25, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom((prev) => {
+      const newZoom = Math.max(prev - 0.25, 0.5);
+      // Reset position when zooming out to 1 or below
+      if (newZoom <= 1 && prev > 1) {
+        setPosition({ x: 0, y: 0 });
+      }
+      return newZoom;
+    });
+  };
+
+  const handleRotate = () => {
+    setRotation((prev) => (prev + 90) % 360);
+  };
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(currentImage.imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = currentImage.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
+  const resetView = () => {
+    setZoom(1);
+    setRotation(0);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-99991 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      {/* Header - Image Info and Controls */}
+      <div
+        className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 text-white"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Image Info */}
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-white drop-shadow-lg">
+            {currentImage.name}
+          </h3>
+          <span className="rounded-full bg-black/40 px-3 py-1 text-xs text-white backdrop-blur-sm">
+            {index + 1} / {images.length}
+          </span>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          {/* Zoom Out */}
+          <button
+            onClick={handleZoomOut}
+            disabled={zoom <= 0.5}
+            className={`rounded-lg bg-black/30 p-2 text-white backdrop-blur-sm transition-all ${
+              zoom <= 0.5
+                ? "cursor-not-allowed opacity-40"
+                : "hover:bg-black/50"
+            }`}
+            title="Zoom Out (-)"
+          >
+            <ZoomOut size={20} />
+          </button>
+
+          {/* Zoom Level */}
+          <span className="min-w-[60px] rounded-lg bg-black/30 px-3 py-2 text-center text-sm font-medium text-white backdrop-blur-sm">
+            {Math.round(zoom * 100)}%
+          </span>
+
+          {/* Zoom In */}
+          <button
+            onClick={handleZoomIn}
+            disabled={zoom >= 3}
+            className={`rounded-lg bg-black/30 p-2 text-white backdrop-blur-sm transition-all ${
+              zoom >= 3
+                ? "cursor-not-allowed opacity-40"
+                : "hover:bg-black/50"
+            }`}
+            title="Zoom In (+)"
+          >
+            <ZoomIn size={20} />
+          </button>
+
+          {/* Rotate */}
+          <button
+            onClick={handleRotate}
+            className="rounded-lg bg-black/30 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/50"
+            title="Rotate"
+          >
+            <RotateCw size={20} />
+          </button>
+
+          {/* Reset View */}
+          {(zoom !== 1 || rotation !== 0) && (
+            <button
+              onClick={resetView}
+              className="rounded-lg bg-black/30 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-black/50"
+            >
+              Reset
+            </button>
+          )}
+
+          {/* Download */}
+          <button
+            onClick={handleDownload}
+            className="rounded-lg bg-black/30 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/50"
+            title="Download"
+          >
+            <Download size={20} />
+          </button>
+
+          {/* Close */}
+          <button
+            onClick={onClose}
+            className="rounded-lg bg-black/30 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/50"
+            title="Close (Esc)"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Image Container */}
+      <div
+        id="image-viewer-container"
+        className="relative flex h-full w-full items-center justify-center p-20"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Previous Button */}
+        {index > 0 && (
+          <button
+            onClick={handlePrevious}
+            className="absolute left-4 z-10 rounded-full bg-white/10 p-3 backdrop-blur-sm transition-all hover:bg-white/20 dark:bg-gray-800/50 dark:hover:bg-gray-700/50"
+            title="Previous (←)"
+          >
+            <ChevronLeft size={32} className="text-white" />
+          </button>
+        )}
+
+        {/* Image */}
+        <div
+          className="flex h-full w-full items-center justify-center overflow-hidden"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+          }}
+        >
+          <div
+            className="h-full w-full flex items-center justify-center"
+            style={{
+              transform: `translate(${position.x}px, ${position.y}px)`,
+              transition: isDragging ? "none" : "transform 0.2s",
+            }}
+          >
+            <img
+              id="viewer-image"
+              src={currentImage.imageUrl}
+              alt={currentImage.name}
+              className="max-h-full max-w-full object-contain"
+              style={{
+                transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                transformOrigin: "center center",
+              }}
+              draggable={false}
+            />
+          </div>
+        </div>
+
+        {/* Next Button */}
+        {index < images.length - 1 && (
+          <button
+            onClick={handleNext}
+            className="absolute right-4 z-10 rounded-full bg-white/10 p-3 backdrop-blur-sm transition-all hover:bg-white/20 dark:bg-gray-800/50 dark:hover:bg-gray-700/50"
+            title="Next (→)"
+          >
+            <ChevronRight size={32} className="text-white" />
+          </button>
+        )}
+      </div>
+
+      {/* Keyboard Shortcuts Helper */}
+      <div
+        className="absolute bottom-4 left-4 rounded-lg bg-black/50 px-3 py-2 text-xs text-white backdrop-blur-sm"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="space-y-1">
+          <div>
+            <kbd className="rounded bg-white/20 px-2 py-1">Esc</kbd> Đóng
+          </div>
+          <div>
+            <kbd className="rounded bg-white/20 px-2 py-1">←</kbd>
+            <kbd className="ml-1 rounded bg-white/20 px-2 py-1">→</kbd> Chuyển
+            ảnh
+          </div>
+          <div>
+            <kbd className="rounded bg-white/20 px-2 py-1">+</kbd>
+            <kbd className="ml-1 rounded bg-white/20 px-2 py-1">-</kbd> Phóng
+            to/Thu nhỏ
+          </div>
+          <div>
+            <kbd className="rounded bg-white/20 px-2 py-1">Cuộn chuột</kbd> Zoom
+          </div>
+          <div>
+            <kbd className="rounded bg-white/20 px-2 py-1">Giữ chuột trái</kbd> Di chuyển
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ImageViewer;
